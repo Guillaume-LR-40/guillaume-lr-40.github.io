@@ -1,14 +1,278 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coach 2×8</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coach 2×8</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background:#eef2f7; color:#0f172a; }
+    .app { max-width: 440px; min-height: 100vh; margin: 0 auto; background:#f8fafc; padding-bottom:86px; }
+    header { padding:24px 18px 18px; color:white; background:linear-gradient(135deg,#0f172a,#2563eb); border-radius:0 0 28px 28px; }
+    h1 { margin:0; font-size:30px; }
+    h2 { margin:0 0 12px; font-size:19px; }
+    p { line-height:1.45; }
+    .sub { opacity:.86; margin-top:6px; }
+    .content { padding:16px; }
+    .card { background:white; border-radius:22px; padding:16px; margin-bottom:14px; box-shadow:0 8px 24px rgba(15,23,42,.08); }
+    .score { font-size:46px; font-weight:900; color:#2563eb; }
+    .muted { color:#64748b; font-size:14px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    .pill { border:1px solid #cbd5e1; border-radius:999px; padding:10px 13px; font-weight:800; background:white; }
+    .pill.active { background:#2563eb; color:white; border-color:#2563eb; }
+    .timeline { display:grid; grid-template-columns:95px 1fr; gap:10px; padding:9px 0; border-bottom:1px solid #e2e8f0; }
+    .time { color:#f97316; font-weight:900; }
+    .check { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #e2e8f0; cursor:pointer; }
+    .box { width:25px; height:25px; border-radius:8px; border:2px solid #94a3b8; display:flex; align-items:center; justify-content:center; color:white; font-weight:900; }
+    .checked .box { background:#16a34a; border-color:#16a34a; }
+    input, select { width:100%; padding:13px; border-radius:14px; border:1px solid #cbd5e1; margin:7px 0; font-size:16px; background:white; }
+    button { width:100%; border:0; border-radius:15px; padding:14px; background:#2563eb; color:white; font-size:16px; font-weight:900; margin-top:8px; }
+    .danger { background:#dc2626; }
+    .green { color:#16a34a; font-weight:900; }
+    .orange { color:#f97316; font-weight:900; }
+    .tabs { position:fixed; left:50%; transform:translateX(-50%); bottom:0; width:100%; max-width:440px; display:grid; grid-template-columns:repeat(5,1fr); background:white; border-top:1px solid #e2e8f0; padding:7px 5px 10px; }
+    .tab { text-align:center; padding:8px 2px; font-size:11px; color:#64748b; font-weight:800; border-radius:13px; }
+    .tab.active { color:#2563eb; background:#eff6ff; }
+    .screen { display:none; }
+    .screen.active { display:block; }
+    .kpi { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .kpi div { background:#f8fafc; padding:12px; border-radius:15px; border:1px solid #e2e8f0; }
+    .big { font-size:24px; font-weight:900; color:#2563eb; }
+    .small { font-size:13px; color:#64748b; }
+    .progressBar { height:14px; border-radius:999px; background:#e2e8f0; overflow:hidden; margin:10px 0; }
+    .progressFill { height:100%; background:#2563eb; width:0%; }
+  </style>
 </head>
-<body style="font-family:Arial;text-align:center;padding:40px;">
-<h1>🏋️ Coach 2×8</h1>
-<p>Application de Guillaume</p>
-<p>Objectif : 70 kg 🚀</p>
-<p>🚭 Sans tabac</p>
+<body>
+<div class="app">
+  <header>
+    <h1>Coach 2×8</h1>
+    <div class="sub">Sport • habitudes • prise de masse • sans tabac</div>
+  </header>
+
+  <main class="content">
+    <section id="home" class="screen active">
+      <div class="card">
+        <h2>Bonjour Guillaume 👋</h2>
+        <div class="score" id="dailyScore">0/100</div>
+        <p class="muted">Score quotidien</p>
+        <div class="row">
+          <span class="pill active" onclick="setShift('morning')" id="morningPill">Matin</span>
+          <span class="pill" onclick="setShift('afternoon')" id="afternoonPill">Après-midi</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🚭 Sans tabac</h2>
+        <div class="kpi">
+          <div><span class="big" id="smokeDaysHome">0</span><br><span class="small">jours</span></div>
+          <div><span class="big" id="moneyHome">0€</span><br><span class="small">économisés</span></div>
+          <div><span class="big" id="cigsHome">0</span><br><span class="small">cigarettes évitées</span></div>
+          <div><span class="big" id="nextGoalHome">7j</span><br><span class="small">prochain palier</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Planning du jour</h2>
+        <div id="planning"></div>
+      </div>
+
+      <div class="card">
+        <h2>Habitudes du jour</h2>
+        <div id="habits"></div>
+      </div>
+    </section>
+
+    <section id="sport" class="screen">
+      <div class="card">
+        <h2>🏋️ Programme semaine</h2>
+        <p><strong>Lundi :</strong> Épaules + Triceps</p>
+        <p><strong>Mardi :</strong> Biceps + Abdos</p>
+        <p><strong>Mercredi :</strong> Jambes</p>
+        <p><strong>Jeudi :</strong> Épaules + Bras</p>
+        <p><strong>Vendredi :</strong> Rappel bras/épaules léger</p>
+      </div>
+      <div class="card">
+        <h2>Suivi séance</h2>
+        <input id="exercise" placeholder="Exercice ex: Curl haltères">
+        <input id="charge" placeholder="Charge ex: 12 kg">
+        <input id="series" placeholder="Séries x reps ex: 4x10">
+        <input id="note" placeholder="Note / difficulté">
+        <button onclick="saveWorkout()">Enregistrer</button>
+        <div id="workoutHistory"></div>
+      </div>
+    </section>
+
+    <section id="nutrition" class="screen">
+      <div class="card">
+        <h2>🍽️ Nutrition</h2>
+        <p>Yazio reste ton suivi principal. Ici tu coches la régularité.</p>
+      </div>
+      <div class="card">
+        <h2>Objectifs prise de masse</h2>
+        <p>✅ 3 repas minimum</p>
+        <p>✅ 1 à 2 collations</p>
+        <p>✅ Protéines tous les jours</p>
+        <p>✅ Hydratation 2,5 L</p>
+      </div>
+    </section>
+
+    <section id="tabac" class="screen">
+      <div class="card">
+        <h2>🚭 Sans tabac</h2>
+        <label>Date d’arrêt</label>
+        <input id="quitDate" type="date" onchange="saveQuitDate()">
+        <button onclick="setTomorrow()">Démarrer demain</button>
+      </div>
+
+      <div class="card">
+        <h2>Compteur</h2>
+        <div class="kpi">
+          <div><span class="big" id="smokeDays">0</span><br><span class="small">jours sans tabac</span></div>
+          <div><span class="big" id="cigsAvoided">0</span><br><span class="small">cigarettes évitées</span></div>
+          <div><span class="big" id="moneySaved">0€</span><br><span class="small">économisés</span></div>
+          <div><span class="big" id="goal">7j</span><br><span class="small">prochain palier</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Envie de fumer ?</h2>
+        <p>Bois un grand verre d’eau. Attends 10 minutes. Respire lentement.</p>
+        <button class="danger" onclick="craving()">J’ai envie de fumer</button>
+        <p id="cravingText" class="green"></p>
+      </div>
+    </section>
+
+    <section id="progress" class="screen">
+      <div class="card">
+        <h2>📊 Objectif 70 kg</h2>
+        <p>Départ : <strong>60 kg</strong></p>
+        <p>Objectif : <strong>70 kg propre</strong></p>
+        <input id="weight" type="number" value="60" oninput="saveWeight()">
+        <div class="progressBar"><div class="progressFill" id="weightFill"></div></div>
+        <div class="score" id="weightProgress">0%</div>
+      </div>
+      <div class="card">
+        <h2>Mensurations</h2>
+        <input id="arm" placeholder="Tour de bras">
+        <input id="shoulders" placeholder="Tour d’épaules">
+        <input id="waist" placeholder="Tour de taille">
+        <button onclick="saveMeasures()">Enregistrer mensurations</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <div class="tab active" onclick="showScreen('home', this)">Accueil</div>
+    <div class="tab" onclick="showScreen('sport', this)">Sport</div>
+    <div class="tab" onclick="showScreen('nutrition', this)">Nutrition</div>
+    <div class="tab" onclick="showScreen('tabac', this)">Tabac</div>
+    <div class="tab" onclick="showScreen('progress', this)">Suivi</div>
+  </nav>
+</div>
+
+<script>
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+
+const morningPlan = [['04:00','Réveil + hydratation'],['04:20','Petit-déjeuner'],['05:00-13:00','Travail'],['09:00','Collation protéinée'],['13:30','Repas midi'],['16:30','Récupérer Coline'],['17:15','Préparation repas soir'],['18:30','Dîner'],['21:00','Routine calme']];
+const afternoonPlan = [['07:00','Réveil + hydratation'],['08:30','Déposer Coline'],['09:00','Retour maison'],['09:15','Séance sport'],['10:45','Repas avant travail'],['12:00-20:00','Travail'],['15:30','Collation protéinée'],['18:00','Collation légère'],['20:30','Dîner simple'],['22:30','Coucher']];
+const habits = ['2,5 L d’eau','Protéines prises','Yazio complété','Séance réalisée','Sommeil ≥ 7h','Repas préparé','Collation prise','Étirements','0 cigarette'];
+
+let shift = localStorage.getItem('shift') || 'morning';
+let today = new Date().toISOString().slice(0,10);
+
+function showScreen(id, tab) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active'); tab.classList.add('active');
+  updateAll();
+}
+function setShift(value) {
+  shift = value; localStorage.setItem('shift', value);
+  document.getElementById('morningPill').classList.toggle('active', value==='morning');
+  document.getElementById('afternoonPill').classList.toggle('active', value==='afternoon');
+  renderPlanning();
+}
+function renderPlanning() {
+  const list = shift === 'morning' ? morningPlan : afternoonPlan;
+  document.getElementById('planning').innerHTML = list.map(x=>`<div class="timeline"><div class="time">${x[0]}</div><div>${x[1]}</div></div>`).join('');
+}
+function renderHabits() {
+  const saved = JSON.parse(localStorage.getItem('habits-'+today) || '{}');
+  document.getElementById('habits').innerHTML = habits.map(h=>`<div class="check ${saved[h]?'checked':''}" onclick="toggleHabit(this,'${h.replace(/'/g,"")}')"><div class="box">✓</div><div>${h}</div></div>`).join('');
+  updateScore();
+}
+function toggleHabit(el, h) {
+  el.classList.toggle('checked');
+  const saved = JSON.parse(localStorage.getItem('habits-'+today) || '{}');
+  saved[h] = el.classList.contains('checked');
+  localStorage.setItem('habits-'+today, JSON.stringify(saved));
+  updateScore();
+}
+function updateScore() {
+  const checked = document.querySelectorAll('#habits .check.checked').length;
+  document.getElementById('dailyScore').textContent = Math.round((checked/habits.length)*100) + '/100';
+}
+function saveWorkout() {
+  const data = JSON.parse(localStorage.getItem('workouts') || '[]');
+  data.unshift({date: today, ex: exercise.value, charge: charge.value, series: series.value, note: note.value});
+  localStorage.setItem('workouts', JSON.stringify(data));
+  exercise.value=charge.value=series.value=note.value='';
+  renderWorkout();
+}
+function renderWorkout() {
+  const data = JSON.parse(localStorage.getItem('workouts') || '[]').slice(0,5);
+  workoutHistory.innerHTML = data.map(w=>`<p><strong>${w.date}</strong><br>${w.ex} — ${w.charge} — ${w.series}<br><span class="muted">${w.note}</span></p>`).join('');
+}
+function saveQuitDate() { localStorage.setItem('quitDate', quitDate.value); updateTabac(); }
+function setTomorrow() {
+  const d = new Date(); d.setDate(d.getDate()+1);
+  quitDate.value = d.toISOString().slice(0,10);
+  saveQuitDate();
+}
+function updateTabac() {
+  const q = localStorage.getItem('quitDate');
+  if (q) quitDate.value = q;
+  let days = 0;
+  if (q) {
+    const start = new Date(q + 'T00:00:00');
+    const now = new Date();
+    days = Math.max(0, Math.floor((now - start)/(1000*60*60*24)));
+  }
+  const cigs = days * 15;
+  const money = Math.round(days * 4.5);
+  const next = days < 7 ? '7j' : days < 30 ? '30j' : days < 100 ? '100j' : '1 an';
+  smokeDays.textContent = days; cigsAvoided.textContent = cigs; moneySaved.textContent = money+'€'; goal.textContent = next;
+  smokeDaysHome.textContent = days; cigsHome.textContent = cigs; moneyHome.textContent = money+'€'; nextGoalHome.textContent = next;
+}
+function craving() {
+  updateTabac();
+  cravingText.textContent = 'Tiens 10 minutes. Tu protèges ton souffle, ta prise de muscle et ton argent.';
+}
+function saveWeight() {
+  localStorage.setItem('weight', weight.value);
+  updateWeight();
+}
+function updateWeight() {
+  const w = Number(localStorage.getItem('weight') || weight.value || 60);
+  weight.value = w;
+  const pct = Math.max(0, Math.min(100, Math.round(((w-60)/10)*100)));
+  weightProgress.textContent = pct+'%';
+  weightFill.style.width = pct+'%';
+}
+function saveMeasures() {
+  localStorage.setItem('measures', JSON.stringify({arm:arm.value, shoulders:shoulders.value, waist:waist.value}));
+  alert('Mensurations enregistrées');
+}
+function loadMeasures() {
+  const m = JSON.parse(localStorage.getItem('measures') || '{}');
+  arm.value = m.arm || ''; shoulders.value = m.shoulders || ''; waist.value = m.waist || '';
+}
+function updateAll() { renderPlanning(); renderHabits(); renderWorkout(); updateTabac(); updateWeight(); loadMeasures(); setShift(shift); }
+updateAll();
+</script>
 </body>
 </html>
+
