@@ -1,1 +1,137 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f3f4f6;
+  color: #111827;
+}
 
+.app {
+  max-width: 800px;
+  margin: auto;
+  padding: 16px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  margin-bottom: 4px;
+}
+
+header p {
+  color: #6b7280;
+}
+
+.card {
+  background: white;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.week-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+select,
+button {
+  border: none;
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+select {
+  background: #eef2ff;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+button {
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.week-selector button {
+  min-width: 46px;
+  height: 46px;
+  font-size: 22px;
+}
+
+.periode {
+  text-align: center;
+  color: #374151;
+  font-weight: bold;
+}
+
+.jour-card {
+  background: white;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.jour-card h2 {
+  margin-top: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.total-jour {
+  margin-top: 12px;
+  padding: 10px;
+  background: #ecfdf5;
+  border-radius: 12px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.ligne {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ligne:last-child {
+  border-bottom: none;
+}
+
+.important {
+  color: #047857;
+  font-size: 18px;
+}
+
+.actions {
+  display: grid;
+  gap: 10px;
+}
+
+.danger {
+  background: #dc2626;
+}
+
+@media (max-width: 500px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
