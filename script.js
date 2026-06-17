@@ -1,4 +1,5 @@
-const OBJECTIF_SEMAINE = 36.75;
+
+    const OBJECTIF_SEMAINE = 36.75;
 
 const jours = [
   "Lundi",
@@ -26,6 +27,8 @@ function init() {
 }
 
 function remplirAnnees() {
+  anneeSelect.innerHTML = "";
+
   for (let annee = anneeActive - 2; annee <= anneeActive + 2; annee++) {
     const option = document.createElement("option");
     option.value = annee;
@@ -37,6 +40,8 @@ function remplirAnnees() {
 }
 
 function remplirSemaines() {
+  semaineSelect.innerHTML = "";
+
   for (let i = 1; i <= 52; i++) {
     const option = document.createElement("option");
     option.value = i;
@@ -80,6 +85,10 @@ function getCleStockage() {
   return `horaires_${anneeActive}_S${semaineActive}`;
 }
 
+function getCleSoldeDepart() {
+  return "solde_depart_compteur_majore";
+}
+
 function creerSemaineVide() {
   return jours.map(jour => ({
     jour,
@@ -102,6 +111,24 @@ function chargerSemaine() {
 function sauvegarderSemaine() {
   const donnees = lireDonneesEcran();
   localStorage.setItem(getCleStockage(), JSON.stringify(donnees));
+  calculerResume();
+}
+
+function chargerSoldeDepart() {
+  const input = document.getElementById("soldeDepart");
+  if (!input) return;
+
+  const solde = localStorage.getItem(getCleSoldeDepart());
+  input.value = solde !== null ? solde : "";
+
+  input.addEventListener("input", sauvegarderSoldeDepart);
+}
+
+function sauvegarderSoldeDepart() {
+  const input = document.getElementById("soldeDepart");
+  if (!input) return;
+
+  localStorage.setItem(getCleSoldeDepart(), input.value);
   calculerResume();
 }
 
@@ -136,7 +163,7 @@ function creerSelectHeure(index, champ, label, valeur) {
 
   for (let h = 0; h <= 23.75; h += 0.25) {
     const val = Number(h.toFixed(2));
-    const selected = Number(valeur) === val ? "selected" : "";
+    const selected = valeur !== "" && Number(valeur) === val ? "selected" : "";
     options += `<option value="${val}" ${selected}>${formatDecimal(val)} — ${formatHeure(val)}</option>`;
   }
 
@@ -197,18 +224,24 @@ function calculerResume() {
   const heuresSupp = Math.max(total - OBJECTIF_SEMAINE, 0);
   const compteurValorise = heuresSupp * 1.25;
 
-  const soldeDepartInput = document.getElementById("soldeDepart");
-  const soldeDepart = soldeDepartInput && soldeDepartInput.value !== ""
-    ? Number(soldeDepartInput.value)
+  const inputSolde = document.getElementById("soldeDepart");
+  const soldeDepart = inputSolde
+    ? Number(String(inputSolde.value).replace(",", ".")) || 0
     : 0;
 
   const compteurTotal = soldeDepart + compteurValorise;
 
-  document.getElementById("totalSemaine").textContent = `${formatDecimal(total)} h`;
-document.getElementById("heuresSupp").textContent = `${formatDecimal(heuresSupp)} h`;
-document.getElementById("compteurValorise").textContent = `${formatDecimal(compteurValorise)} h`;
-document.getElementById("compteurTotal").textContent = `${formatDecimal(compteurTotal)} h`;
+  afficherTexte("totalSemaine", `${formatDecimal(total)} h`);
+  afficherTexte("heuresSupp", `${formatDecimal(heuresSupp)} h`);
+  afficherTexte("compteurValorise", `${formatDecimal(compteurValorise)} h`);
+  afficherTexte("compteurTotal", `${formatDecimal(compteurTotal)} h`);
+}
 
+function afficherTexte(id, texte) {
+  const element = document.getElementById(id);
+  if (element) {
+    element.textContent = texte;
+  }
 }
 
 function copierSemainePrecedente() {
@@ -240,49 +273,6 @@ function resetSemaine() {
   chargerSemaine();
 }
 
-function exporterCSV() {
-  const donnees = lireDonneesEcran();
-
-  let csv = "Année;Semaine;Jour;Embauche;Départ coupure;Retour coupure;Débauche;Total jour\n";
-
-  let total = 0;
-
-  donnees.forEach(jour => {
-    const totalJour = calculerJour(jour);
-    total += totalJour;
-
-    csv += `${anneeActive};${semaineActive};${jour.jour};`;
-    csv += `${formatDecimalExport(jour.embauche)};`;
-    csv += `${formatDecimalExport(jour.departCoupure)};`;
-    csv += `${formatDecimalExport(jour.retourCoupure)};`;
-    csv += `${formatDecimalExport(jour.debauche)};`;
-    csv += `${formatDecimal(totalJour)}\n`;
-  });
-
-  const heuresSupp = Math.max(total - OBJECTIF_SEMAINE, 0);
-  const compteurValorise = heuresSupp * 1.25;
-const soldeDepartInput = document.getElementById("soldeDepart");
-const soldeDepart = soldeDepartInput && soldeDepartInput.value !== ""
-  ? Number(soldeDepartInput.value)
-  : 0;
-
-const compteurTotal = soldeDepart + compteurValorise;
-  csv += `\n;;;;;;Objectif semaine;${formatDecimal(OBJECTIF_SEMAINE)}\n`;
-  csv += `;;;;;;Total semaine;${formatDecimal(total)}\n`;
-  csv += `;;;;;;Heures supplémentaires;${formatDecimal(heuresSupp)}\n`;
-  csv += `;;;;;;Compteur valorisé +25%;${formatDecimal(compteurValorise)}\n`;
-
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const lien = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-
-  lien.href = url;
-  lien.download = `horaires_semaine_${semaineActive}_${anneeActive}.csv`;
-  lien.click();
-
-  URL.revokeObjectURL(url);
-}
-
 function afficherPeriode() {
   const lundi = getDateOfISOWeek(semaineActive, anneeActive);
   const dimanche = new Date(lundi);
@@ -308,8 +298,11 @@ function getDateOfISOWeek(semaine, annee) {
 function getNumeroSemaineISO(date) {
   const copie = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const jour = copie.getUTCDay() || 7;
+
   copie.setUTCDate(copie.getUTCDate() + 4 - jour);
+
   const debutAnnee = new Date(Date.UTC(copie.getUTCFullYear(), 0, 1));
+
   return Math.ceil((((copie - debutAnnee) / 86400000) + 1) / 7);
 }
 
@@ -318,13 +311,8 @@ function formatDate(date) {
 }
 
 function formatDecimal(valeur) {
-  if (valeur === "" || valeur === null || valeur === undefined) return "";
+  if (valeur === "" || valeur === null || valeur === undefined) return "0,00";
   return Number(valeur).toFixed(2).replace(".", ",");
-}
-
-function formatDecimalExport(valeur) {
-  if (valeur === "" || valeur === null || valeur === undefined) return "";
-  return formatDecimal(valeur);
 }
 
 function formatHeure(decimal) {
@@ -333,27 +321,5 @@ function formatHeure(decimal) {
   return `${heures}h${minutes.toString().padStart(2, "0")}`;
 }
 
-
-init();
-
-
-function getCleSoldeDepart() {
-  return "solde_depart_compteur_majore";
-}
-
-function chargerSoldeDepart() {
-  const input = document.getElementById("soldeDepart");
-  if (!input) return;
-
-  const solde = localStorage.getItem(getCleSoldeDepart());
-  input.value = solde !== null ? solde : "";
-}
-
-function sauvegarderSoldeDepart() {
-  const input = document.getElementById("soldeDepart");
-  if (!input) return;
-
-  localStorage.setItem(getCleSoldeDepart(), input.value);
-  calculerResume();
-}
+init();                          
 
