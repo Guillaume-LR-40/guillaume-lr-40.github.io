@@ -197,11 +197,18 @@ function calculerResume() {
   const heuresSupp = Math.max(total - OBJECTIF_SEMAINE, 0);
   const compteurValorise = heuresSupp * 1.25;
 
+  const soldeDepartInput = document.getElementById("soldeDepart");
+  const soldeDepart = soldeDepartInput && soldeDepartInput.value !== ""
+    ? Number(soldeDepartInput.value)
+    : 0;
+
+  const compteurTotal = soldeDepart + compteurValorise;
+
   document.getElementById("totalSemaine").textContent = `${formatDecimal(total)} h`;
   document.getElementById("heuresSupp").textContent = `${formatDecimal(heuresSupp)} h`;
   document.getElementById("compteurValorise").textContent = `${formatDecimal(compteurValorise)} h`;
+  
 }
-document.getElementById("compteurTotal").textContent = `${formatDecimal(compteurTotal)} h`;
 function copierSemainePrecedente() {
   let semainePrecedente = semaineActive - 1;
   let anneePrecedente = anneeActive;
@@ -323,6 +330,8 @@ function formatHeure(decimal) {
   const minutes = Math.round((decimal - heures) * 60);
   return `${heures}h${minutes.toString().padStart(2, "0")}`;
 }
+
+
 
 init();
 function getCleSoldeDepart() {
