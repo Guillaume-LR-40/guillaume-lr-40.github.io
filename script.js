@@ -332,25 +332,26 @@ function formatHeure(decimal) {
 }
 
 
-
 init();
+
+
 function getCleSoldeDepart() {
   return "solde_depart_compteur_majore";
 }
 
 function chargerSoldeDepart() {
-  const solde = localStorage.getItem(getCleSoldeDepart());
   const input = document.getElementById("soldeDepart");
+  if (!input) return;
 
-  if (input) {
-    input.value = solde ? solde : "";
-  }
+  const solde = localStorage.getItem(getCleSoldeDepart());
+  input.value = solde !== null ? solde : "";
 }
 
 function sauvegarderSoldeDepart() {
   const input = document.getElementById("soldeDepart");
-  const valeur = input.value === "" ? 0 : Number(input.value);
+  if (!input) return;
 
-  localStorage.setItem(getCleSoldeDepart(), valeur);
+  localStorage.setItem(getCleSoldeDepart(), input.value);
   calculerResume();
 }
+
