@@ -205,10 +205,12 @@ function calculerResume() {
   const compteurTotal = soldeDepart + compteurValorise;
 
   document.getElementById("totalSemaine").textContent = `${formatDecimal(total)} h`;
-  document.getElementById("heuresSupp").textContent = `${formatDecimal(heuresSupp)} h`;
-  document.getElementById("compteurValorise").textContent = `${formatDecimal(compteurValorise)} h`;
-  
+document.getElementById("heuresSupp").textContent = `${formatDecimal(heuresSupp)} h`;
+document.getElementById("compteurValorise").textContent = `${formatDecimal(compteurValorise)} h`;
+document.getElementById("compteurTotal").textContent = `${formatDecimal(compteurTotal)} h`;
+
 }
+
 function copierSemainePrecedente() {
   let semainePrecedente = semaineActive - 1;
   let anneePrecedente = anneeActive;
