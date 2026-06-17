@@ -1,1 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mes horaires</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Mes horaires</h1>
+      <p>Suivi hebdomadaire du temps de travail</p>
+    </header>
 
+    <section class="card">
+      <div class="week-selector">
+        <button onclick="changerSemaine(-1)">←</button>
+
+        <div>
+          <label>Année</label>
+          <select id="anneeSelect" onchange="changerAnnee()"></select>
+
+          <label>Semaine</label>
+          <select id="semaineSelect" onchange="changerSemaineDirect()"></select>
+        </div>
+
+        <button onclick="changerSemaine(1)">→</button>
+      </div>
+
+      <p id="periodeSemaine" class="periode"></p>
+    </section>
+
+    <section id="joursContainer"></section>
+
+    <section class="card resume">
+      <h2>Résumé semaine</h2>
+
+      <div class="ligne">
+        <span>Objectif semaine</span>
+        <strong>36,75 h</strong>
+      </div>
+
+      <div class="ligne">
+        <span>Total réalisé</span>
+        <strong id="totalSemaine">0,00 h</strong>
+      </div>
+
+      <div class="ligne">
+        <span>Heures supplémentaires</span>
+        <strong id="heuresSupp">0,00 h</strong>
+      </div>
+
+      <div class="ligne important">
+        <span>Compteur valorisé +25%</span>
+        <strong id="compteurValorise">0,00 h</strong>
+      </div>
+    </section>
+
+    <section class="card actions">
+      <button onclick="exporterCSV()">Exporter Excel / CSV</button>
+      <button onclick="copierSemainePrecedente()">Copier semaine précédente</button>
+      <button class="danger" onclick="resetSemaine()">Effacer la semaine</button>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
