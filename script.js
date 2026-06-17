@@ -21,6 +21,7 @@ const joursContainer = document.getElementById("joursContainer");
 function init() {
   remplirAnnees();
   remplirSemaines();
+  chargerSoldeDepart();
   chargerSemaine();
 }
 
@@ -200,7 +201,7 @@ function calculerResume() {
   document.getElementById("heuresSupp").textContent = `${formatDecimal(heuresSupp)} h`;
   document.getElementById("compteurValorise").textContent = `${formatDecimal(compteurValorise)} h`;
 }
-
+document.getElementById("compteurTotal").textContent = `${formatDecimal(compteurTotal)} h`;
 function copierSemainePrecedente() {
   let semainePrecedente = semaineActive - 1;
   let anneePrecedente = anneeActive;
@@ -251,7 +252,12 @@ function exporterCSV() {
 
   const heuresSupp = Math.max(total - OBJECTIF_SEMAINE, 0);
   const compteurValorise = heuresSupp * 1.25;
+const soldeDepartInput = document.getElementById("soldeDepart");
+const soldeDepart = soldeDepartInput && soldeDepartInput.value !== ""
+  ? Number(soldeDepartInput.value)
+  : 0;
 
+const compteurTotal = soldeDepart + compteurValorise;
   csv += `\n;;;;;;Objectif semaine;${formatDecimal(OBJECTIF_SEMAINE)}\n`;
   csv += `;;;;;;Total semaine;${formatDecimal(total)}\n`;
   csv += `;;;;;;Heures supplémentaires;${formatDecimal(heuresSupp)}\n`;
@@ -319,3 +325,23 @@ function formatHeure(decimal) {
 }
 
 init();
+function getCleSoldeDepart() {
+  return "solde_depart_compteur_majore";
+}
+
+function chargerSoldeDepart() {
+  const solde = localStorage.getItem(getCleSoldeDepart());
+  const input = document.getElementById("soldeDepart");
+
+  if (input) {
+    input.value = solde ? solde : "";
+  }
+}
+
+function sauvegarderSoldeDepart() {
+  const input = document.getElementById("soldeDepart");
+  const valeur = input.value === "" ? 0 : Number(input.value);
+
+  localStorage.setItem(getCleSoldeDepart(), valeur);
+  calculerResume();
+}
